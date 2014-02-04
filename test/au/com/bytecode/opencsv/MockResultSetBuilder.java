@@ -1,14 +1,25 @@
 package au.com.bytecode.opencsv;
 
-import javax.sql.rowset.serial.SerialClob;
+import static java.sql.Types.BIGINT;
+import static java.sql.Types.BIT;
+import static java.sql.Types.BOOLEAN;
+import static java.sql.Types.JAVA_OBJECT;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.sql.Types.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import javax.sql.rowset.serial.SerialClob;
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,7 +74,6 @@ public class MockResultSetBuilder {
                 break;
             case BIGINT:
                 when(rs.getLong(index)).thenReturn(value != null ? Long.valueOf(value).longValue() : 0);
-                wnrl.add(value == null);
                 break;
             case Types.DECIMAL:
             case Types.DOUBLE:
@@ -76,7 +86,6 @@ public class MockResultSetBuilder {
             case Types.TINYINT:
             case Types.SMALLINT:
                 when(rs.getInt(index)).thenReturn(value != null ? new Integer(value).intValue() : 0);
-                wnrl.add(value == null);
                 break;
             case ResultSetHelperService.NVARCHAR: // todo : use rs.getNString
             case ResultSetHelperService.NCHAR: // todo : use rs.getNString
@@ -105,7 +114,7 @@ public class MockResultSetBuilder {
                 break;
 
         }
-
+        wnrl.add(value == null);
     }
 
     private static Clob createClobFromString(String value) throws SQLException {

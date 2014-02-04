@@ -18,7 +18,13 @@ package au.com.bytecode.opencsv;
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,21 +78,21 @@ public class ResultSetHelperService implements ResultSetHelper {
     }
 
     private String handleObject(Object obj) {
-        return obj == null ? "" : String.valueOf(obj);
+        return obj == null ? null : String.valueOf(obj);
     }
 
     private String handleBigDecimal(BigDecimal decimal) {
-        return decimal == null ? "" : decimal.toString();
+        return decimal == null ? null : decimal.toString();
     }
 
     private String handleLong(ResultSet rs, int columnIndex) throws SQLException {
         long lv = rs.getLong(columnIndex);
-        return rs.wasNull() ? "" : Long.toString(lv);
+        return rs.wasNull() ? null : Long.toString(lv);
     }
 
     private String handleInteger(ResultSet rs, int columnIndex) throws SQLException {
         int i = rs.getInt(columnIndex);
-        return rs.wasNull() ? "" : Integer.toString(i);
+        return rs.wasNull() ? null : Integer.toString(i);
     }
 
     private String handleDate(ResultSet rs, int columnIndex, String dateFormatString) throws SQLException {
@@ -111,7 +117,7 @@ public class ResultSetHelperService implements ResultSetHelper {
     private String getColumnValue(ResultSet rs, int colType, int colIndex, boolean trim, String dateFormatString, String timestampFormatString)
             throws SQLException, IOException {
 
-        String value = "";
+        String value = null;
 
         switch (colType) {
             case Types.BIT:
@@ -119,19 +125,14 @@ public class ResultSetHelperService implements ResultSetHelper {
                 value = handleObject(rs.getObject(colIndex));
                 break;
             case Types.BOOLEAN:
-                boolean b = rs.getBoolean(colIndex);
-                value = Boolean.valueOf(b).toString();
+                value = handleBoolean(rs, colIndex);
                 break;
             case NCLOB: // todo : use rs.getNClob
             case Types.CLOB:
-                Clob c = rs.getClob(colIndex);
-                if (c != null) {
-                    value = read(c);
-                }
+                value = handleClob(rs.getClob(colIndex));
                 break;
             case Types.BIGINT:
-                value = handleLong(rs, colIndex);
-                break;
+                return handleLong(rs, colIndex);
             case Types.DECIMAL:
             case Types.DOUBLE:
             case Types.FLOAT:
@@ -142,8 +143,7 @@ public class ResultSetHelperService implements ResultSetHelper {
             case Types.INTEGER:
             case Types.TINYINT:
             case Types.SMALLINT:
-                value = handleInteger(rs, colIndex);
-                break;
+                return handleInteger(rs, colIndex);
             case Types.DATE:
                 value = handleDate(rs, colIndex, dateFormatString);
                 break;
@@ -167,16 +167,31 @@ public class ResultSetHelperService implements ResultSetHelper {
                 }
                 break;
             default:
-                value = "";
-        }
-
-
-        if (value == null) {
-            value = "";
+                value = null;
         }
 
         return value;
+    }
 
+    private String handleBoolean(ResultSet rs, int colIndex) throws SQLException {
+        String value;
+        boolean b = rs.getBoolean(colIndex);
+        if (rs.wasNull()) {
+            value = null;
+        } else {
+            value = Boolean.valueOf(b).toString();
+        }
+        return value;
+    }
+
+    private String handleClob(Clob c) throws SQLException, IOException {
+        String value;
+        if (c != null) {
+            value = read(c);
+        } else {
+            value = null;
+        }
+        return value;
     }
 
     private static String read(Clob c) throws SQLException, IOException {

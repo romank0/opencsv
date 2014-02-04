@@ -16,15 +16,24 @@ package au.com.bytecode.opencsv;
  limitations under the License.
  */
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class CSVWriterTest {
 
@@ -247,17 +256,17 @@ public class CSVWriterTest {
     }
 
     /**
-     * Tests the ability for the writer to apply quotes only where strings contain the separator, escape, quote or new line characters.
+     * Tests the ability for the writer to apply quotes only where strings contain the separator, escape, quote, new line characters or is empty.
      */
     @Test
     public void testIntelligentQuotes() {
-        String[] line = {"1", "Foo", "With,Separator", "Line\nBreak", "Hello \"Foo Bar\" World", "Bar"};
+        String[] line = {"1", "Foo", "With,Separator", "Line\nBreak", "Hello \"Foo Bar\" World", "Bar", ""};
         StringWriter sw = new StringWriter();
         CSVWriter csvw = new CSVWriter(sw, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER);
         csvw.writeNext(line, false);
         String result = sw.toString();
 
-        assertEquals("1,Foo,\"With,Separator\",\"Line\nBreak\",\"Hello \"\"Foo Bar\"\" World\",Bar\n", result);
+        assertEquals("1,Foo,\"With,Separator\",\"Line\nBreak\",\"Hello \"\"Foo Bar\"\" World\",Bar,\"\"\n", result);
     }
 
 

@@ -16,7 +16,11 @@ package au.com.bytecode.opencsv;
  limitations under the License.
  */
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -245,7 +249,8 @@ public class CSVWriter implements Closeable, Flushable {
 
             Boolean stringContainsSpecialCharacters = stringContainsSpecialCharacters(nextElement);
 
-            if ((applyQuotesToAll || stringContainsSpecialCharacters) && quotechar != NO_QUOTE_CHARACTER)
+            boolean quotingRequired = applyQuotesToAll || stringContainsSpecialCharacters || nextElement.isEmpty();
+            if (quotingRequired && quotechar != NO_QUOTE_CHARACTER)
                 sb.append(quotechar);
 
             if (stringContainsSpecialCharacters) {
@@ -254,7 +259,7 @@ public class CSVWriter implements Closeable, Flushable {
                 sb.append(nextElement);
             }
 
-            if ((applyQuotesToAll || stringContainsSpecialCharacters) && quotechar != NO_QUOTE_CHARACTER)
+            if (quotingRequired && quotechar != NO_QUOTE_CHARACTER)
                 sb.append(quotechar);
         }
 

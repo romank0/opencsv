@@ -15,15 +15,21 @@ package au.com.bytecode.opencsv;
  limitations under the License.
  */
 
+import static org.junit.Assert.assertArrayEquals;
+
+import java.io.IOException;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.sql.*;
-import java.text.SimpleDateFormat;
-
-import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,7 +66,7 @@ public class ResultSetHelperServiceTest {
     public void getObjectFromResultSet() throws SQLException, IOException {
         String[] expectedNames = {"object", "Null Object"};
         String[] realValues = {"foo", null};
-        String[] expectedValues = {"foo", ""};
+        String[] expectedValues = {"foo", null};
         int[] expectedTypes = {Types.JAVA_OBJECT, Types.JAVA_OBJECT};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -78,7 +84,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"bit", "Null bit"};
         String[] realValues = {"1", null};
-        String[] expectedValues = {"1", ""};
+        String[] expectedValues = {"1", null};
         int[] expectedTypes = {Types.BIT, Types.BIT};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -95,7 +101,7 @@ public class ResultSetHelperServiceTest {
     public void getBooleanFromResultSet() throws SQLException, IOException {
         String[] expectedNames = {"true", "false", "TRUE", "FALSE", "Null"};
         String[] realValues = {"true", "false", "TRUE", "FALSE", null};
-        String[] expectedValues = {"true", "false", "true", "false", "false"};
+        String[] expectedValues = {"true", "false", "true", "false", null};
         int[] expectedTypes = {Types.BOOLEAN, Types.BOOLEAN, Types.BOOLEAN, Types.BOOLEAN, Types.BOOLEAN};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -112,7 +118,7 @@ public class ResultSetHelperServiceTest {
     public void getBigIntFromResultSet() throws SQLException, IOException {
         String[] expectedNames = {"BigInt", "Null BigInt"};
         String[] realValues = {"100", null};
-        String[] expectedValues = {"100", ""};
+        String[] expectedValues = {"100", null};
         int[] expectedTypes = {Types.BIGINT, Types.BIGINT};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -130,7 +136,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Decimal", "double", "float", "real", "numeric", "Null"};
         String[] realValues = {"1.1", "2.2", "3.3", "4.4", "5.5", null};
-        String[] expectedValues = {"1.1", "2.2", "3.3", "4.4", "5.5", ""};
+        String[] expectedValues = {"1.1", "2.2", "3.3", "4.4", "5.5", null};
         int[] expectedTypes = {Types.DECIMAL, Types.DOUBLE, Types.FLOAT, Types.REAL, Types.NUMERIC, Types.DECIMAL};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -147,7 +153,7 @@ public class ResultSetHelperServiceTest {
     public void getIntegerFromResultSet() throws SQLException, IOException {
         String[] expectedNames = {"Integer", "tinyint", "smallint", "Null"};
         String[] realValues = {"1", "2", "3", null};
-        String[] expectedValues = {"1", "2", "3", ""};
+        String[] expectedValues = {"1", "2", "3", null};
         int[] expectedTypes = {Types.INTEGER, Types.TINYINT, Types.SMALLINT, Types.INTEGER};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -165,7 +171,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"longvarchar", "varchar", "char", "Null"};
         String[] realValues = {"a", "b", "c", null};
-        String[] expectedValues = {"a", "b", "c", ""};
+        String[] expectedValues = {"a", "b", "c", null};
         int[] expectedTypes = {Types.LONGVARCHAR, Types.VARCHAR, Types.CHAR, Types.CHAR};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -179,29 +185,11 @@ public class ResultSetHelperServiceTest {
     }
 
     @Test
-    public void getCharHandlesNulls() throws SQLException, IOException {
-
-        String[] expectedNames = {"longvarchar", "varchar", "char", "Null"};
-        String[] realValues = {"a", "b", "c", null};
-        String[] expectedValues = {"a", "b", "c", ""};
-        int[] expectedTypes = {Types.LONGVARCHAR, Types.VARCHAR, Types.CHAR, Types.CHAR};
-
-        ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
-        ResultSet resultSet = MockResultSetBuilder.buildResultSet(metaData, realValues, expectedTypes);
-
-        ResultSetHelperService service = new ResultSetHelperService();
-
-        String[] columnValues = service.getColumnValues(resultSet, true);
-        assertArrayEquals(expectedValues, columnValues);
-
-    }
-
-    @Test
     public void getUnsupportedFromResultSet() throws SQLException, IOException {
 
         String[] expectedNames = {"Array", "Null"};
         String[] realValues = {"1", null};
-        String[] expectedValues = {"", ""};
+        String[] expectedValues = {null, null};
         int[] expectedTypes = {Types.ARRAY, Types.ARRAY};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -223,7 +211,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Date", "Null"};
         String[] realValues = {Long.toString(dateInMilliSeconds), null};
-        String[] expectedValues = {dateFormat.format(date), ""};
+        String[] expectedValues = {dateFormat.format(date), null};
         int[] expectedTypes = {Types.DATE, Types.DATE};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -246,7 +234,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Date", "Null"};
         String[] realValues = {Long.toString(dateInMilliSeconds), null};
-        String[] expectedValues = {dateFormat.format(date), ""};
+        String[] expectedValues = {dateFormat.format(date), null};
         int[] expectedTypes = {Types.DATE, Types.DATE};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -267,7 +255,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Time", "Null"};
         String[] realValues = {Long.toString(dateInMilliSeconds), null};
-        String[] expectedValues = {time.toString(), ""};
+        String[] expectedValues = {time.toString(), null};
         int[] expectedTypes = {Types.TIME, Types.TIME};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -288,7 +276,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Timestamp", "Null"};
         String[] realValues = {Long.toString(dateInMilliSeconds), null};
-        String[] expectedValues = {timeFormat.format(date), ""};
+        String[] expectedValues = {timeFormat.format(date), null};
         int[] expectedTypes = {Types.TIMESTAMP, Types.TIMESTAMP};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -310,7 +298,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Timestamp", "Null"};
         String[] realValues = {Long.toString(dateInMilliSeconds), null};
-        String[] expectedValues = {timeFormat.format(date), ""};
+        String[] expectedValues = {timeFormat.format(date), null};
         int[] expectedTypes = {Types.TIMESTAMP, Types.TIMESTAMP};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -329,7 +317,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Clob", "Null"};
         String[] realValues = {clobString, null};
-        String[] expectedValues = {clobString, ""};
+        String[] expectedValues = {clobString, null};
         int[] expectedTypes = {Types.CLOB, Types.CLOB};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -348,7 +336,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Clob", "Null"};
         String[] realValues = {clobString, null};
-        String[] expectedValues = {clobString, ""};
+        String[] expectedValues = {clobString, null};
         int[] expectedTypes = {Types.CLOB, Types.CLOB};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
@@ -367,7 +355,7 @@ public class ResultSetHelperServiceTest {
 
         String[] expectedNames = {"Clob", "Null"};
         String[] realValues = {clobString, null};
-        String[] expectedValues = {clobString, ""};
+        String[] expectedValues = {clobString, null};
         int[] expectedTypes = {Types.CLOB, Types.CLOB};
 
         ResultSetMetaData metaData = MockResultSetMetaDataBuilder.buildMetaData(expectedNames, expectedTypes);
