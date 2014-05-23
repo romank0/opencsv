@@ -275,11 +275,7 @@ public class CSVParser {
                 }
                 inField = !inField;
             } else if (c == separator && !(inQuotes && !ignoreQuotations)) {
-            	if (!quotesFoundInField && this.quotedEmptyStrings && sb.length() == 0) {
-            		tokensOnThisLine.add(null);
-            	} else {
-            		tokensOnThisLine.add(sb.toString());
-            	}
+            	addToken(tokensOnThisLine, sb, quotesFoundInField);
                 
                 sb = new StringBuilder(INITIAL_READ_SIZE); // start work on next token
                 inField = false;
@@ -303,11 +299,20 @@ public class CSVParser {
             }
         }
         if (sb != null) {
-            tokensOnThisLine.add(sb.toString());
+        	addToken(tokensOnThisLine, sb, quotesFoundInField);
         }
         return tokensOnThisLine.toArray(new String[tokensOnThisLine.size()]);
 
     }
+
+	private void addToken(List<String> tokensOnThisLine, StringBuilder sb,
+			boolean quotesFoundInField) {
+		if (!quotesFoundInField && this.quotedEmptyStrings && sb.length() == 0) {
+			tokensOnThisLine.add(null);
+		} else {
+			tokensOnThisLine.add(sb.toString());
+		}
+	}
 
     /**
      * precondition: the current character is a quote or an escape

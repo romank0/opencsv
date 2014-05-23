@@ -127,13 +127,26 @@ public class CSVParserTest {
     @Test
     public void parseEmptyElementsAsNullsForQuotedEmptyStringOption() throws IOException {
     	csvParser = new CSVParser(QUOTED_EMPTY_STRINGS);
-        String[] nextLine = csvParser.parseLine(",\"\", ");
-        assertEquals(3, nextLine.length);
+        String[] nextLine = csvParser.parseLine(",\"\", ,\" \"");
+        assertEquals(4, nextLine.length);
         assertEquals(null, nextLine[0]);
         assertEquals("", nextLine[1]);
         assertEquals(" ", nextLine[2]);
+        assertEquals(" ", nextLine[3]);
     }
-    
+
+    @Test
+    public void parseEmptyElementsInEndOfLine() throws IOException {
+    	csvParser = new CSVParser(QUOTED_EMPTY_STRINGS);
+        String[] nextLine = csvParser.parseLine(",");
+        assertEquals(2, nextLine.length);
+        assertEquals(null, nextLine[1]);
+        
+        nextLine = csvParser.parseLine(",\"\"");
+        assertEquals(2, nextLine.length);
+        assertEquals("", nextLine[1]);
+    }
+
     
     @Test
     public void parseMultiLinedQuoted() throws IOException {
