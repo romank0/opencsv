@@ -15,7 +15,8 @@ import static org.junit.Assert.*;
 
 public class CSVParserTest {
 
-    CSVParser csvParser;
+    private static final boolean QUOTED_EMPTY_STRINGS = true;
+	CSVParser csvParser;
 
     @Before
     public void setUp() {
@@ -123,6 +124,17 @@ public class CSVParserTest {
         assertEquals("", nextLine[2]);
     }
 
+    @Test
+    public void parseEmptyElementsAsNullsForQuotedEmptyStringOption() throws IOException {
+    	csvParser = new CSVParser(QUOTED_EMPTY_STRINGS);
+        String[] nextLine = csvParser.parseLine(",\"\", ");
+        assertEquals(3, nextLine.length);
+        assertEquals(null, nextLine[0]);
+        assertEquals("", nextLine[1]);
+        assertEquals(" ", nextLine[2]);
+    }
+    
+    
     @Test
     public void parseMultiLinedQuoted() throws IOException {
         String[] nextLine = csvParser.parseLine("a,\"PO Box 123,\nKippax,ACT. 2615.\nAustralia\",d.\n");

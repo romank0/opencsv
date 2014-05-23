@@ -44,6 +44,8 @@ public class CSVParser {
 
     final boolean ignoreQuotations;
 
+	private boolean quotedEmptyStrings = false;
+
     /**
      * The default separator to use if none is supplied to the constructor.
      */
@@ -177,7 +179,12 @@ public class CSVParser {
         this.ignoreQuotations = ignoreQuotations;
     }
 
-    private boolean anyCharactersAreTheSame(char separator, char quotechar, char escape) {
+    public CSVParser(boolean quotedEmptyStrings) {
+    	this();
+		this.quotedEmptyStrings = quotedEmptyStrings;
+	}
+
+	private boolean anyCharactersAreTheSame(char separator, char quotechar, char escape) {
         return isSameCharacter(separator, quotechar) || isSameCharacter(separator, escape) || isSameCharacter(quotechar, escape);
     }
 
@@ -232,6 +239,7 @@ public class CSVParser {
             pending = null;
             inQuotes = !this.ignoreQuotations;//true;
         }
+        boolean quotesFoundInField = false;
         for (int i = 0; i < nextLine.length(); i++) {
 
             char c = nextLine.charAt(i);
@@ -246,6 +254,7 @@ public class CSVParser {
                     i++;
                 } else {
                     inQuotes = !inQuotes;
+                    quotesFoundInField = true;
 
                     // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
                     if (!strictQuotes) {
@@ -266,9 +275,15 @@ public class CSVParser {
                 }
                 inField = !inField;
             } else if (c == separator && !(inQuotes && !ignoreQuotations)) {
-                tokensOnThisLine.add(sb.toString());
+            	if (!quotesFoundInField && this.quotedEmptyStrings && sb.length() == 0) {
+            		tokensOnThisLine.add(null);
+            	} else {
+            		tokensOnThisLine.add(sb.toString());
+            	}
+                
                 sb = new StringBuilder(INITIAL_READ_SIZE); // start work on next token
                 inField = false;
+                quotesFoundInField = false;
             } else {
                 if (!strictQuotes || (inQuotes && !ignoreQuotations)) {
                     sb.append(c);
